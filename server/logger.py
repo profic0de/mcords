@@ -86,4 +86,4 @@ class Logger:
             parent_logger=self if self.parent_logger is None else self.parent_logger
         )
 
-logger = Logger(thread_name="main", output_levels=("INFO", "WARN", "ERROR", "DEBUG"), log_to_file=False)
+logger = Logger(thread_name="main", output_levels=("INFO", "WARN", "ERROR"), log_to_file=False)

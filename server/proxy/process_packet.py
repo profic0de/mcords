@@ -18,9 +18,11 @@ def process_packet(data_b: bytes, direction: str, player: Player, logger: Logger
         player.proxy["compression"], offset = Var.read_varint_from(data)
         logger.debug(f"Set compression to: {player.proxy["compression"]}")
 
-        packet_id, data = Tool.parse_packet(data[offset:])
-        parse = True
+        logger.debug(f"🔵 [packet_id, data] - {packet_id, data}")# bytes - {data}")
+        packet_id, data = Tool.parse_packet(Tool.decompress_packet(data[offset:]))
+        logger.debug(f"🔵 [packet_id, data] - {packet_id, data}")# bytes - {data}")
 
+        parse = True
 
     if ((player.proxy["state"] == "login" and direction == "Clientbound") or parse) and packet_id == 0x02 :
         # logger.debug(f"[{direction}] - {packet_id:02x} - {len(data)} bytes - {data}")

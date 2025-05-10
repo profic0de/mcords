@@ -77,6 +77,8 @@ class Proxy:
         )
         player.remote.sendall(Var.write_varint(len(handshake))+handshake)
 
+        if len(Var.write_string(username)) > 16: player.send_packet(0x00, Var.write_string(dumps([{"text":"❌ Failed to connect to the target server:\n","color":"red"},{"text":"Username value is bigger than 16 bytes: ","color":"white"},{"text":f"{len(Var.write_string(username))} bytes","color":"aqua"}], separators=(",", ":"))))
+
         payload = (
             b'\x00'+
             Var.write_string(username) +
@@ -137,9 +139,9 @@ class Proxy:
                     # Intercept packet
                     direction = "server" if source == "client" else "client"
 
-                    if player.proxy["once"] <= 8:
-                        player.proxy["once"] = player.proxy["once"]+1
-                        self.logger.debug(f"[P] Packet processing ({direction}) - {data}")
+                    # if player.proxy["once"] <= 8:
+                    #     player.proxy["once"] = player.proxy["once"]+1
+                    #     self.logger.debug(f"[P] Packet processing ({direction}) - {data}")
 
                     try:
                         processed_data = data

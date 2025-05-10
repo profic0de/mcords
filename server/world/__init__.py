@@ -5,7 +5,7 @@ from server.logger import logger
 from server.world.on_packet import on_packet_received
 import selectors
 
-logger = logger.create_sub_logger(thread_name="world", output_levels=("INFO", "WARN", "ERROR", "DEBUG"))
+logger = logger.create_sub_logger(thread_name="world", output_levels=("INFO", "WARN", "ERROR"))
 
 class World:
     def __init__(self):
