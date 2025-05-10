@@ -57,6 +57,10 @@
 ```bash
 git clone https://github.com/profic0de/mcords.git
 cd mcords
+```
+### Run the server
+
+```bash
 python main.py
 ```
 <!--pip install -r requirements.txt-->
