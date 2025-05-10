@@ -48,6 +48,7 @@
 ```bash
 git clone https://github.com/profic0de/mcords.git
 cd mcords
+python main.py
 ```
 <!--pip install -r requirements.txt-->
 
