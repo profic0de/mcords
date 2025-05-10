@@ -1,6 +1,6 @@
 # MCords
 
-**mcords proxy** is a custom Minecraft proxy server written in Python designed for flexibility, extensibility, and full control over client-server interaction. Built to support modern Minecraft versions, `mcords` enables advanced packet manipulation, dimension-specific datapack loading, authentication passthrough, and other core networking features for Minecraft modders and server developers.
+**MCords proxy** is a custom Minecraft proxy server written in Python designed for flexibility, extensibility, and full control over client-server interaction. Built to support modern Minecraft versions, `mcords` enables advanced packet manipulation, authentication passthrough, and other core networking features for Minecraft modders and server developers.
 
 ---
 
