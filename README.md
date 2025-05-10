@@ -9,7 +9,7 @@
 - ⚙️ **Custom Packet Handling:** Full control over Minecraft packets with your own implementation.
 - 🌐 **Proxy Architecture:** Forward Minecraft clients to backend servers with real-time packet inspection or modification.
 - 🔐 **Authentication Support:** Mojang-style authentication passthrough support.
-- 📦 **Mod Integration:** Works alongside custom Fabric mods (1.21.4+) and auto-loads datapacks per-dimension.
+- 📦 **Mod Integration:** Work in progress.
 - 🧪 **Modular Structure:** Clean and expandable architecture for plugins, tools, and debugging features.
 
 ## ✅ Supports
@@ -21,7 +21,7 @@
 | Online Mode (Auth)         | ✅ Yes     | Mojang-style authentication passthrough                               |
 | Offline Mode               | ✅ Yes     | UUID fallback mode supported                                          |
 | Encryption                 | ✅ Yes     | Uses RSA with `cryptography` and `PyNaCl`                             |
-| Mod Integration            | ⚠️ No      | (in proggress)                                                        |
+| Mod Integration            | ⚠️ No      | (Work in progress)                                                    |
 | Bedrock Support            | ❌ No      | Java-only focus                                                       |
 | GUI                        | ❌ No      | CLI only; GUI planned for later                                       |
 
