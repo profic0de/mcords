@@ -30,24 +30,23 @@
 | Bedrock Support            | ❌ No      | Java-only focus                                                       |
 | GUI                        | ❌ No      | CLI only; GUI planned for later                                       |
 
-
-<!--
 ---
 
 ## 📦 Installation
 
+<!--
 ### Requirements
 
 - Python 3.10+
 - `aiohttp`
 - `cryptography`
 - `PyNaCl`
-- (Optional) Fabric 1.21.4 mod loader for enhanced mod integration
+-->
 
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/mcords-proxy.git
-cd mcords-proxy
-pip install -r requirements.txt
--->
+git clone https://github.com/profic0de/mcords.git
+cd mcords
+<!--pip install -r requirements.txt-->
+
