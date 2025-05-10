@@ -86,7 +86,7 @@ class Tool:
 
         if data_length > 0:
             decompressed_data = zlib.decompress(data[offset:])
-        else:    
+        else:
             decompressed_data = data[offset:]
 
         return Var.write_varint(len(decompressed_data)) + decompressed_data
