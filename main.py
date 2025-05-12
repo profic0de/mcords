@@ -1,35 +1,61 @@
-from socket import socket, timeout, AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
-from server.packet import HOST, PORT
-from server import Handle
-from server.logger import logger
-from server.world import world
-from server.proxy import proxy
-from threading import Thread
-from server.tools import Tool
-import sys
+import asyncio
+import signal
 
-if __name__ == "__main__":
-    with socket(AF_INET, SOCK_STREAM) as server:
-        server.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        server.bind((HOST, PORT))
-        server.listen(5)
-        server.settimeout(1.0)  # Helps with keyboard interrupts
-        logger.info(f"🟢 Minecraft server running on {HOST}:{PORT}")
+# Define the client handler coroutine
+async def handle_client(reader, writer):
+    addr = writer.get_extra_info('peername')  # Get the client address
+    print(f"New connection from {addr}")
 
-        try:
-            world.start()
-            proxy.start()
-            Tool.start_fake_lan_server("Python LAN Server", PORT)
-            # command_thread = Thread(target=command_handler, daemon=True)
-            # command_thread.start()
+    # Receive data asynchronously
+    data = await reader.read(100)  # Read up to 100 bytes from the client
+    message = data.decode()  # Decode the data to a string
+    print(f"Received: {message}")
 
-            while True:
-                try:
-                    client, addr = server.accept()
-                    client.settimeout(None)  # Timeout for client operations
-                    thread = Thread(target=Handle.client, args=(client,), daemon=True)
-                    thread.start()
-                except timeout:
-                    continue
-        except KeyboardInterrupt:
-            logger.info("🛑 Server shutting down...")
+    # Send data back to the client asynchronously
+    response = f"Hello {addr}, you sent: {message}"
+    writer.write(response.encode())  # Write the response to the client
+    await writer.drain()  # Ensure the data is actually sent
+
+    print(f"Closing connection with {addr}")
+    writer.close()  # Close the connection to the client
+    await writer.wait_closed()  # Wait for the connection to be closed
+
+# Define the main server function
+async def main():
+    # Start the server
+    server = await asyncio.start_server(
+        handle_client, '127.0.0.1', 8888)  # Listen on localhost and port 8888
+
+    addr = server.sockets[0].getsockname()
+    print(f"Server started on {addr}")
+
+    # Run the server indefinitely, accepting connections and handling them
+    async with server:
+        await server.serve_forever()
+
+# Graceful shutdown function for handling KeyboardInterrupt
+def shutdown(signal, loop):
+    print("Received shutdown signal. Shutting down gracefully...")
+    for task in asyncio.Task.all_tasks(loop=loop):
+        task.cancel()
+
+    loop.stop()
+
+# Run the event loop and handle keyboard interrupt
+def run():
+    loop = asyncio.get_event_loop()
+
+    # Set up the signal handler for graceful shutdown
+    loop.add_signal_handler(signal.SIGINT, shutdown, signal.SIGINT, loop)
+
+    try:
+        # Start the server
+        loop.run_until_complete(main())
+    except asyncio.CancelledError:
+        pass
+    finally:
+        print("Server has been shut down.")
+
+# Run the program
+run()
+

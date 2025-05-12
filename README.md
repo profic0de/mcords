@@ -4,10 +4,12 @@
 
 ---
 
-> [!WARNING]
-> This project is in **beta** and may contain bugs or unstable features.
+> [!CAUTION]
+> This project is now rewritten to add asyncio.
 
 ---
+
+<!--
 
 ## ✨ Features
 
