@@ -4,8 +4,8 @@
 
 ---
 
-> [!CAUTION]
-> This project is now rewritten to add asyncio.
+> [!WARNING]
+> This project is under heavy development.
 
 ---
 
