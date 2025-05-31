@@ -53,13 +53,13 @@
 - `PyNaCl`
 -->
 
-### Clone the Repository
+### 📂 Clone the Repository
 
 ```bash
 git clone https://github.com/profic0de/mcords.git
 cd mcords
 ```
-### Run the server
+### 🚀 Run the server
 
 ```bash
 pip install -r requirements.txt
