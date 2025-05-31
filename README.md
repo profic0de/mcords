@@ -19,12 +19,11 @@
 
 | Feature                     | Supported | Notes                                                                 |
 |----------------------------|-------------|----------------------------------------------------------------------|
-| Minecraft Version          | ✅ 1.21.5  | Tested with Fabric Mods and vanilla                                   |
-| Java Edition               | ✅ Yes     | Java-only (no Bedrock support planned)                                |
+| Minecraft Version          | ✅ 1.21.5  | Tested with Fabric Mods and vanilla                                   |\
 | Online Mode (Auth)         | ✅ Yes     | Mojang-style authentication passthrough                               |
 | Offline Mode               | ✅ Yes     | UUID fallback mode supported                                          |
 | Encryption                 | ✅ Yes     | Uses RSA with `cryptography`                                          |
-| Bedrock Support            | ❌ No      | Java-only focus                                                       |
+| Bedrock Support            | ❌ No      | Java-only focus (no Bedrock support planned)                          |
 | GUI                        | ⚠️ Sort of |                                                                       |
 
 ## 🖥️ OS Compatibility
