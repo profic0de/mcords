@@ -1,61 +1,42 @@
 import asyncio
-import signal
+from traceback import print_exc
+from server.cli import Console, colored
+from server.config import config
+from server.client import handle_client
+from server.blocks import *
 
-# Define the client handler coroutine
-async def handle_client(reader, writer):
-    addr = writer.get_extra_info('peername')  # Get the client address
-    print(f"New connection from {addr}")
+stop_event = asyncio.Event()
+console = Console(stop_event)
 
-    # Receive data asynchronously
-    data = await reader.read(100)  # Read up to 100 bytes from the client
-    message = data.decode()  # Decode the data to a string
-    print(f"Received: {message}")
-
-    # Send data back to the client asynchronously
-    response = f"Hello {addr}, you sent: {message}"
-    writer.write(response.encode())  # Write the response to the client
-    await writer.drain()  # Ensure the data is actually sent
-
-    print(f"Closing connection with {addr}")
-    writer.close()  # Close the connection to the client
-    await writer.wait_closed()  # Wait for the connection to be closed
-
-# Define the main server function
-async def main():
-    # Start the server
-    server = await asyncio.start_server(
-        handle_client, '127.0.0.1', 8888)  # Listen on localhost and port 8888
-
+async def start_server():
+    server = await asyncio.start_server(handle_client, '127.0.0.1', int(config.get("server-port", "25565")))
     addr = server.sockets[0].getsockname()
-    print(f"Server started on {addr}")
+    console.print(f"✅ Server started on {addr[0]}:{addr[1]}")
 
-    # Run the server indefinitely, accepting connections and handling them
     async with server:
-        await server.serve_forever()
+        await stop_event.wait()
+        console.print("🛑 Server shutting down...")
 
-# Graceful shutdown function for handling KeyboardInterrupt
-def shutdown(signal, loop):
-    print("Received shutdown signal. Shutting down gracefully...")
-    for task in asyncio.Task.all_tasks(loop=loop):
-        task.cancel()
-
-    loop.stop()
-
-# Run the event loop and handle keyboard interrupt
-def run():
-    loop = asyncio.get_event_loop()
-
-    # Set up the signal handler for graceful shutdown
-    loop.add_signal_handler(signal.SIGINT, shutdown, signal.SIGINT, loop)
+async def entry():
+    tasks = [
+        asyncio.create_task(start_server()),
+        # asyncio.create_task(world.tick()),
+        asyncio.create_task(console.input())
+    ]
 
     try:
-        # Start the server
-        loop.run_until_complete(main())
-    except asyncio.CancelledError:
-        pass
+        await stop_event.wait()
+    except Exception as e:
+        console.print(f"🛑 Fatal error: {e}")
+        print_exc()
     finally:
-        print("Server has been shut down.")
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        print("\nExited cleanly.")
 
-# Run the program
-run()
-
+if __name__ == "__main__":
+    try:
+        asyncio.run(entry())
+    except KeyboardInterrupt:
+        print("\n🛑 Server shutdown requested via Ctrl+C")

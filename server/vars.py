@@ -3,6 +3,7 @@ import hashlib
 import socket
 import struct
 import uuid
+import asyncio
 
 class Var:
     def recv_all(conn: socket.socket) -> Optional[bytes]:
@@ -40,11 +41,10 @@ class Var:
         return Var.write_varint(len(encoded)) + encoded
     
     def read_string(data: bytes, offset: int = 0) -> tuple[str, int]:
-        length, length_size = Var.read_varint_from(data[offset:])
-        offset += length_size
+        length, delta = Var.read_varint_from(data[offset:])
+        offset += delta
         string = data[offset:offset + length].decode('utf-8')
-        offset += length
-        return string, offset
+        return string, length + delta
 
     def write_varint(value: int) -> bytes:
         """Encodes an integer as a Minecraft VarInt."""
@@ -86,23 +86,27 @@ class Var:
                 return num, i + 1
         raise Exception("VarInt too big")
 
-    def read_varint(conn) -> Tuple[Optional[int], bytes]:
-        """Reads VarInt from socket with timeout handling"""
-        data = b""
-        num = 0
-        for i in range(5):
+    @staticmethod
+    async def read_varint(reader: asyncio.StreamReader) -> int:
+        from server.world.engine import ClientSideError
+        """Read a VarInt from the stream."""
+        value = 0
+        shift = 0
+        while True:
+            byte_raw = None
             try:
-                byte = conn.recv(1)
-            except socket.timeout:
-                return None, data
-            if not byte:
-                return None, data
-            data += byte
-            byte_val = byte[0]
-            num |= (byte_val & 0x7F) << (7 * i)
-            if not (byte_val & 0x80):
-                return num, data
-        return None, data  # Malformed VarInt
+                byte_raw = await reader.read(1)
+            except:
+                raise ConnectionResetError
+            if not byte_raw:
+                # raise EOFError("Unexpected end of stream while reading VarInt")
+                raise ClientSideError("Unexpected end of stream while reading VarInt")
+            byte = byte_raw[0]
+            value |= (byte & 0x7F) << shift
+            shift += 7
+            if (byte & 0x80) == 0:
+                break
+        return value
     
     def read_varint_bytes(data: bytes) -> tuple[bytes, bytes]:
         length, length_size = Var.read_varint_from_bytes(data)
@@ -215,14 +219,14 @@ class Var:
         # Reads a double (64-bit floating point) from the beginning of data
         value = struct.unpack('>d', data[:8])[0]
         return value, 8
-    
+
     def write_short(value: int) -> bytes:
         """Encodes a 2-byte signed short integer in big-endian."""
         return struct.pack('>h', value)
 
-    def read_short(data: bytes) -> int:
+    def read_short(data: bytes, offset: int = 0) -> int:
         """Decodes a 2-byte signed short integer from big-endian bytes."""
-        return struct.unpack('>h', data[:2])[0], 2
+        return struct.unpack('>h', data[offset:offset+2])[0], 2
 
     def write_position(x: int, y: int, z: int) -> int:
         # Handle negative values using two’s complement
