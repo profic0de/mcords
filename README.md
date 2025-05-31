@@ -64,7 +64,6 @@ cd mcords
 ### Run the server
 
 ```bash
+pip install -r requirements.txt
 python main.py
 ```
-<!--pip install -r requirements.txt-->
-
