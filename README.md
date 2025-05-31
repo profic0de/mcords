@@ -23,7 +23,7 @@
 | Java Edition               | ✅ Yes     | Java-only (no Bedrock support planned)                                |
 | Online Mode (Auth)         | ✅ Yes     | Mojang-style authentication passthrough                               |
 | Offline Mode               | ✅ Yes     | UUID fallback mode supported                                          |
-| Encryption                 | ✅ Yes     | Uses RSA with `cryptography` and `PyNaCl`                             |
+| Encryption                 | ✅ Yes     | Uses RSA with `cryptography`                                          |
 | Bedrock Support            | ❌ No      | Java-only focus                                                       |
 | GUI                        | ⚠️ Sort of |                                                                       |
 
@@ -38,9 +38,12 @@
 
 ---
 
--->
 ## 📦 Installation
 
+### 📋 Requirements
+
+- Python 3.13+
+- `requirements.txt`
 <!--
 ### Requirements
 
