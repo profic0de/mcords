@@ -4,48 +4,45 @@
 
 ---
 
-> [!CAUTION]
-> This project is now rewritten to add asyncio.
+> [!WARNING]
+> This project is under heavy development.
 
 ---
-
-<!--
 
 ## ✨ Features
 
 - ⚙️ **Custom Packet Handling:** Full control over Minecraft packets with your own implementation.
-- 🌐 **Proxy Architecture:** Forward Minecraft clients to backend servers with real-time packet inspection or modification.
+- 🌐 **Proxy Architecture:** Forward Minecraft clients to servers with real-time packet inspection or modification.
 - 🔐 **Authentication Support:** Mojang-style authentication passthrough support.
-- 📦 **Mod Integration:** Work in progress.
-- 🧪 **Modular Structure:** Clean and expandable architecture for plugins, tools, and debugging features.
 
 ## ✅ Supports
 
 | Feature                     | Supported | Notes                                                                 |
-|----------------------------|-----------|-----------------------------------------------------------------------|
-| Minecraft Version          | ✅ 1.21.5  | Tested with Fabric Mods and vanilla                                   |
-| Java Edition               | ✅ Yes     | Java-only (no Bedrock support planned)                                |
+|----------------------------|-------------|----------------------------------------------------------------------|
+| Minecraft Version          | ✅ 1.21.5  | Tested with Fabric Mods and vanilla                                   |\
 | Online Mode (Auth)         | ✅ Yes     | Mojang-style authentication passthrough                               |
 | Offline Mode               | ✅ Yes     | UUID fallback mode supported                                          |
-| Encryption                 | ✅ Yes     | Uses RSA with `cryptography` and `PyNaCl`                             |
-| Mod Integration            | ⚠️ No      | (Work in progress)                                                    |
-| Bedrock Support            | ❌ No      | Java-only focus                                                       |
-| GUI                        | ❌ No      | CLI only; GUI planned for later                                       |
+| Encryption                 | ✅ Yes     | Uses RSA with `cryptography`                                          |
+| Bedrock Support            | ❌ No      | Java-only focus (no Bedrock support planned)                          |
+| GUI                        | ⚠️ Sort of |                                                                       |
 
 ## 🖥️ OS Compatibility
 
 | Operating System | Supported | Notes                                  |
 |------------------|-----------|----------------------------------------|
-| 💻 Windows        | ✅ Yes     | Fully tested; primary development OS|
-| 🐧 Linux          | ⚠️ Not sure | Should work, but not tested        |
+| 💻 Windows        | ✅ Yes      | Working; Fully tested              |
+| 🐧 Linux          | ✅ Yes      | Working; Fully tested              |
 | 🍎 macOS          | ⚠️ Not sure | Should work, but not tested        |
 
 
 ---
 
--->
 ## 📦 Installation
 
+### 📋 Requirements
+
+- Python 3.13+
+- `requirements.txt`
 <!--
 ### Requirements
 
@@ -55,16 +52,15 @@
 - `PyNaCl`
 -->
 
-### Clone the Repository
+### 📂 Clone the Repository
 
 ```bash
 git clone https://github.com/profic0de/mcords.git
 cd mcords
 ```
-### Run the server
+### 🚀 Run the server
 
 ```bash
+pip install -r requirements.txt
 python main.py
 ```
-<!--pip install -r requirements.txt-->
-
