@@ -31,8 +31,8 @@
 
 | Operating System | Supported | Notes                                  |
 |------------------|-----------|----------------------------------------|
-| 💻 Windows        | ✅ Yes     | Fully tested; primary development OS|
-| 🐧 Linux          | ⚠️ Not sure | Should work, but not tested        |
+| 💻 Windows        | ✅ Yes      | Working; Fully tested              |
+| 🐧 Linux          | ✅ Yes      | Working; Fully tested              |
 | 🍎 macOS          | ⚠️ Not sure | Should work, but not tested        |
 
 
