@@ -9,6 +9,7 @@ class Config:
             "network-compression-threshold": "-1",
             "server-port": "25565",
             "online-mode": "true",
+            "server-ip": "0.0.0.0",
             "max-players": "20",
             "version": "1.21.5",
             "motd": "A Minecraft Server"

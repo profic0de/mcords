@@ -33,22 +33,23 @@ async def handle_client(reader, writer):
             await Handle.ping(packet)
 
         if next_state == 2:
-            world = await World(Player(reader, writer))
-            
+            player = Player(reader, writer)
+            world = World(player)
+            ip,name = await world.run()
+
             # await asyncio.sleep(1)
 
         if next_state - 1 not in range(3):
             logger.warn(f"⚠️  Unknown state received: {next_state}")
 
     except ConnectionResetError:
-        logger.warn(f"⚠️ Client forcibly closed the connection")
+        if next_state == 2: logger.info(f"👋 {getattr(player, "username", None)} left the world.")
+        else: logger.warn(f"⚠️ Client forcibly closed the connection")
     except ClientSideError:
         logger.error(f"❌ An error ocured on the clientside")
     except Exception as e:
         error = 1
         logger.error(f"❌ Error handling client:\n{traceback.format_exc()}")
     finally:
-        # writer.close()
-        # await writer.wait_closed()
         if error:
             logger.debug("🔌 Connection closed")

@@ -43,7 +43,7 @@ class Packet:
         self.decryption = AES.new(shared_secret, AES.MODE_CFB, iv=shared_secret, segment_size=8)
 
     async def recv(self, reader: asyncio.StreamReader = None):
-        from server.world.engine import logger
+        from server.world import logger
         _reader = self.__check(reader, True)
         
         async def read_varint_encrypted() -> int:
@@ -80,7 +80,7 @@ class Packet:
         return data
     
     async def send(self, data: bytes, writer: asyncio.StreamWriter = None):
-        from server.world.engine import logger
+        from server.world import logger
         from zlib import compress
         _writer = self.__check(writer, False)
 

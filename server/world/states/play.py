@@ -1,11 +1,10 @@
-from server.world.engine import logger
 from server.packet.build import Build
 from server.player import Player
+from server.world import logger
 
 async def play(player:Player):
-    from server.world.engine import engine
     async with Build(0x2b, player) as build:
-        player.Id = engine.playerId()
+        player.Id = 0
 
         build.int(player.Id) #Player's id
         build.bool(False) #Show hardcore hearts

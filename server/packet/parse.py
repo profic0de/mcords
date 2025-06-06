@@ -59,12 +59,15 @@ class Parse:
         for _ in range(items - 1):
             result.append(type())
         return result
-    
+
     def byte(self) -> bytes:
         return self.stream.read(1)
-    
+
     def rest(self) -> bytes:
         return self.stream.read()
-    
+
     def double(self) -> float:
         return unpack('>d', self.stream.read(8))[0]
+
+    def int(self) -> int:
+        return int.from_bytes(self.stream.read(4), byteorder='big', signed=True)

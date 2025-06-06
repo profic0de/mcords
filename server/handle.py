@@ -2,7 +2,7 @@ from server.packet.parse import Parse
 from server.packet.build import Build
 from server.packet import Packet
 from server.client import logger
-from properties import MOTD_DATA
+from server.properties import MOTD_DATA
 from server.vars import Var
 # from struct import pack
 from json import dumps

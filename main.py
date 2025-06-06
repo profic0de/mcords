@@ -5,11 +5,14 @@ from server.config import config
 from server.client import handle_client
 from server.blocks import *
 
+import gc
+gc.enable()
+
 stop_event = asyncio.Event()
 console = Console(stop_event)
 
 async def start_server():
-    server = await asyncio.start_server(handle_client, '127.0.0.1', int(config.get("server-port", "25565")))
+    server = await asyncio.start_server(handle_client, config.get("server-ip", "0.0.0.0"), int(config.get("server-port", "25565")))
     addr = server.sockets[0].getsockname()
     console.print(f"✅ Server started on {addr[0]}:{addr[1]}")
 

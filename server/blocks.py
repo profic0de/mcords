@@ -1,4 +1,4 @@
-from palette import palette
+from server.palette import palette
 
 import os
 import psutil

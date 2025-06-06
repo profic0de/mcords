@@ -1,62 +1,106 @@
-from server.world.engine import engine, logger
-from threading import Thread, Lock
+from server.world.engine import JoinGameError, ClientSideError
+from server.logger import logger as log
+logger = log.create_sub_logger("world")
+
+from server.packet.build import Build
+from server.packet.parse import Parse
 from server.player import Player
+from server.config import config
 import time, asyncio
 
 class World:
-    def __init__(self):
-        self.players = []
-
+    def __init__(self, player:Player):
+        self.player = player
         self.keepAlive = time.time()
-        self.engine = engine
-        self.playersLock = asyncio.Lock()
-
-    async def join(self, player:Player):
-        async with self.playersLock:
-            self.players.append(player)
-        player.world = self
-        await engine.onJoin(player)
 
     async def tick(self):
         from server.packet.build import Build
         while True:
-            if not self.players or not any(p.state == "play" for p in self.players):
-                await asyncio.sleep(engine.delay)
-                continue
+            try: data = await asyncio.wait_for(self.player.packet.recv(), timeout=0.05)
+            except (asyncio.TimeoutError, ConnectionResetError): pass
+            except Exception as e:
+                from traceback import format_exc
+                if not isinstance(e, ClientSideError):
+                    logger.error(f"Exception caught:\n{format_exc()}")
+                raise ConnectionResetError
+            if data: await self.message(data)
+            else: raise ConnectionResetError
 
-            # Read from all players in parallel
-            tasks = [self.poll_player(p) for p in self.players]
-            await asyncio.gather(*tasks)
-            await engine.tick()
-            # await asyncio.sleep(0.05)
+            await tick(self)
 
-    async def remove(self, player:Player):
-        # from inspect import currentframe
-        # logger.debug(f"Disconnect function was called from: {currentframe().f_back.f_code.co_name}")
+    async def message(self, data:bytes):
+        from time import time
+        with Parse(data) as parse:
+            packet_id = parse.varint()
+            if packet_id in [0x1d,0x1c]:
+                if not hasattr(self.player, "pos"):
+                    class Position:
+                        def __init__(self):
+                            self.x = 0
+                            self.y = 0
+                            self.z = 0
+                    self.player.pos = Position()
+                self.player.pos.x = parse.double()
+                self.player.pos.y = parse.double()
+                self.player.pos.z = parse.double()
+            elif packet_id == 0x1A:
+                self.keepAlive = time()
+            # elif packet_id == 0x24:
+            #     async with Build(0x37, self.player) as build:
+            #         build.raw(parse.stream.read(8))
+            #         logger.info(f'Ping recieved: \'{data}\' and sending: {build.get()}')
 
-        if player in self.players:
-            # self.players.remove(player)
-            await player.disconnect({"text":"Disconnected","color":"red"})
 
-    async def poll_player(self, player:Player):
-        from traceback import format_exc
-        from server.world.engine import ClientSideError
+    async def run(self):
+        from server.world.states import login, configuration, play
+
         try:
-            data = await asyncio.wait_for(player.packet.recv(), timeout=0.05)
-            if data:
-                await engine.message(player, data)
-                # logger.debug(f"Got: {data}")
-            else:
-                await self.remove(player)
-        except asyncio.TimeoutError:
-            pass
-        except ConnectionResetError:
-            # logger.debug(f"ConnectionResetError")
-            # await world.remove(player)
-            pass
-        except ClientSideError:
-            logger.error(f"Clientside error")
-            await self.remove(player)
+            await login.login(self.player, True if config.get("online-mode", "false") == "true" else False, int(config.get("network-compression-threshold", "-1")))
+            await configuration.config(self.player)
+            await play.play(self.player)
         except Exception as e:
-            logger.error(f"Exception caught:\n{format_exc()}")
-            await self.remove(player)
+            logger.info(f"👋 Player {getattr(self.player, 'username', 'Unknown')} caused error during world join: {e}")
+            raise JoinGameError
+        
+        return await self.tick()
+    
+async def tick(self):
+    from server.packet.build import Build
+    from server.world import logger
+    from main import palette
+    from time import time
+    player = self.player
+    if (time() - getattr(player, "keepAliveKick", time())) > 5 and player.state == "play":
+        logger.info(f"{player.name} Timed out")
+        player.disconnect({"text":"Timed out"})
+        del player
+
+    if (time() - getattr(player, "keepAlive", 0)) > 1 and player.state == "play":
+        player.keepAlive = time()
+        async with Build(0x26, player) as build:
+            build.long(0)
+
+    if hasattr(player, "pos"):
+        if not hasattr(player, "data.m"): player.data.m = [0,0]
+        n = lambda c: int(c-1) if c < 0 else int(c)
+        x = player.pos.x
+        z = player.pos.z
+        if (0 < x < 1) and (0 < z < 1): x,z = 0,0
+        m = [n(x),n(z)]
+        # async with Build(0x50, player) as build: build.text({"text":f"M: {[x,z]}; {m}{f", P: {player.data.p}" if hasattr(player.data, "p") else ""}"})
+        if player.data.m != m or (m == [0,0] and getattr(player.data, "bonce", 0) == 0):
+            if m == [0,0]: player.data.bonce = 1
+            else: player.data.bonce = 0
+            player.data.m = m
+            if not hasattr(player.data, "p"): player.data.p = [0,0]
+            # async with Build(0x50, player) as build: build.text({"text":f"M: {m}, P: {player.data.p}"})
+
+            block = lambda pos: "minecraft:gray_concrete" if ((pos[0] // 2) % 2) == ((pos[1] // 2) % 2) else "minecraft:light_gray_concrete"
+            async with Build(0x08, player) as build:
+                build.position(player.data.p[0],0,player.data.p[1])
+                build.varint(palette[block(player.data.p)])
+            async with Build(0x08, player) as build:
+                build.position(m[0],0,m[1])
+                build.varint(palette["minecraft:white_concrete"])
+                # player.executed = 0
+            player.data.p = m
