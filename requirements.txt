@@ -1,2 +1,4 @@
 readchar
 psutil
+dnspython
+mcstatus

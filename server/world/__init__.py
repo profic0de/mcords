@@ -1,3 +1,4 @@
+from server.transfer import resolve_minecraft_srv, ping_minecraft_server
 from server.world.engine import JoinGameError, ClientSideError
 from server.logger import logger as log
 logger = log.create_sub_logger("world")
@@ -26,7 +27,7 @@ class World:
             if data: await self.message(data)
             else: raise ConnectionResetError
 
-            await tick(self)
+            if await tick(self): return self.proxy_value[0]
 
     async def message(self, data:bytes):
         from time import time
@@ -45,10 +46,47 @@ class World:
                 self.player.pos.z = parse.double()
             elif packet_id == 0x1A:
                 self.keepAlive = time()
-            # elif packet_id == 0x24:
-            #     async with Build(0x37, self.player) as build:
-            #         build.raw(parse.stream.read(8))
-            #         logger.info(f'Ping recieved: \'{data}\' and sending: {build.get()}')
+            elif packet_id == 0x3e:
+                parse.varint()
+                if parse.position() == (8,1,13):
+                    async with Build(0x34, self.player) as build:
+                        build.varint(1)
+                        build.varint(8)
+                        build.text({"text":"Enter server ip:"})
+                    async with Build(0x14, self.player) as build:
+                        build.varint(1)
+                        build.varint(0)
+                        build.short(0)
+                        build.raw(b'\x01\xc6\x07\x01\x00\x05\x08\x00')
+                        build.string("mc.hypixel.net")
+            elif packet_id == 0x2e:
+                self.player.ip = parse.string()
+                async with Build(0x13, self.player) as build:
+                        build.varint(1)
+                        build.short(0)
+                        build.short(0)
+            elif packet_id == 0x10:
+                parse.varint()
+                parse.varint()
+                check = parse.short() == 2
+                parse.byte()
+                parse.varint()
+                # def shs(): return (parse.short(), parse.hashed_slot())
+                # parse.array(shs)
+                if check and getattr(self.player, "ip", "mc.hypixel.net") != "mc.hypixel.net":
+                    async with Build(0x72, self.player) as build: build.text({"text":f"Atempting to connect to: {self.player.ip}","color":"green"}); build.bool(0)
+                    async with Build(0x22, self.player) as build: build.byte(6, False); build.float(0)
+
+                    if ping_minecraft_server(resolve_minecraft_srv(self.player.ip)).get("players_online",0) > 0:
+                        async with Build(0x72, self.player) as build: build.text({"text":f"Transfering","color":"green"}); build.bool(0)
+                        async with Build(0x22, self.player) as build: build.byte(6, False); build.float(0)
+
+                        self.proxy_value = [self.player.ip]
+                    else:
+                        async with Build(0x72, self.player) as build: build.text({"text":f"Failed to connect to: {self.player.ip}","color":"red"}); build.bool(0)
+                        async with Build(0x22, self.player) as build: build.byte(6, False); build.float(0)
+
+                # logger.info(parse.rest())
 
 
     async def run(self):
@@ -61,7 +99,12 @@ class World:
         except Exception as e:
             logger.info(f"👋 Player {getattr(self.player, 'username', 'Unknown')} caused error during world join: {e}")
             raise JoinGameError
-        
+                
+        from main import palette
+        async with Build(0x08, self.player) as build:
+            build.position(8, 1, 13)
+            build.varint(palette['minecraft:anvil']+2)
+
         return await self.tick()
     
 async def tick(self):
@@ -78,7 +121,7 @@ async def tick(self):
     if (time() - getattr(player, "keepAlive", 0)) > 1 and player.state == "play":
         player.keepAlive = time()
         async with Build(0x26, player) as build:
-            build.long(0)
+            build.long(0)            
 
     if hasattr(player, "pos"):
         if not hasattr(player, "data.m"): player.data.m = [0,0]
@@ -104,3 +147,6 @@ async def tick(self):
                 build.varint(palette["minecraft:white_concrete"])
                 # player.executed = 0
             player.data.p = m
+
+    if getattr(self, "proxy_value", ""):
+        return True

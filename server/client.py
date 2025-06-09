@@ -1,13 +1,14 @@
+from server.world.engine import ClientSideError
 from server.packet.parse import Parse
 from server.packet.build import Build
+from server.transfer import Transfer
 from server.logger import logger
 from server.player import Player
-from server.world import World
-from server.packet import Packet
-from server.vars import Var
 from server.handle import Handle
-from server.world.engine import ClientSideError
-import json, asyncio, traceback
+from server.packet import Packet
+from server.world import World
+from server.vars import Var
+import traceback, asyncio
 
 logger = logger.create_sub_logger("client", ["ALL"])
 
@@ -35,9 +36,10 @@ async def handle_client(reader, writer):
         if next_state == 2:
             player = Player(reader, writer)
             world = World(player)
-            ip,name = await world.run()
-
-            # await asyncio.sleep(1)
+            ip = await world.run()
+            logger.info(f'📡 Transfering {player.username} to {ip}')
+            await Transfer.to(player, ip)
+            await asyncio.sleep(1)
 
         if next_state - 1 not in range(3):
             logger.warn(f"⚠️  Unknown state received: {next_state}")

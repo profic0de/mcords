@@ -43,8 +43,25 @@ class Parse:
     def long(self) -> int:
         return int.from_bytes(self.stream.read(8), byteorder='big', signed=True)
 
+    def position(self) -> tuple[int, int, int]:
+        value = self.long()
+        x = (value >> 38)
+        y = value & 0xFFF
+        z = (value >> 12) & 0x3FFFFFF
+
+        # Sign extension
+        if x >= 2**25:
+            x -= 2**26
+        if y >= 2**11:
+            y -= 2**12
+        if z >= 2**25:
+            z -= 2**26
+
+        return x, y, z
+
     def array(self, type) -> list | bytearray:
         items = self.varint()
+        if items == 0: return None
         sample = type()
 
         # If it returned a single byte (or bytes), collect into a bytearray
@@ -68,6 +85,19 @@ class Parse:
 
     def double(self) -> float:
         return unpack('>d', self.stream.read(8))[0]
+
+    def bool(self) -> bool:
+        return bool.from_bytes(self.stream.read(1))
+
+    def hashed_slot(self) -> dict:
+        if not self.bool(): return {"hasItem":False}
+        slot = {"hasItem":True}
+        slot["Id"] = self.varint()
+        slot["Count"] = self.varint()
+        def vi(): return (self.varint(), self.int())
+        self.array(vi)
+        self.array(self.varint)
+        return slot
 
     def int(self) -> int:
         return int.from_bytes(self.stream.read(4), byteorder='big', signed=True)
