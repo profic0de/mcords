@@ -40,6 +40,10 @@ class Transfer:
     async def to(player, ip):
         ip, port = resolve_minecraft_srv(ip)
         # print(ip,port)
+        async with Build(0x71, player) as build:
+            build.string("mcords:cookie")
+            build.array(f"{ip}:{port}",build.byte)
+
         async with Build(0x7a, player) as build:
-            build.string(ip)
-            build.varint(port)
+            build.string("127.0.0.1")
+            build.varint(25568)

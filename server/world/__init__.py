@@ -77,7 +77,7 @@ class World:
                     async with Build(0x72, self.player) as build: build.text({"text":f"Atempting to connect to: {self.player.ip}","color":"green"}); build.bool(0)
                     async with Build(0x22, self.player) as build: build.byte(6, False); build.float(0)
 
-                    if ping_minecraft_server(resolve_minecraft_srv(self.player.ip)).get("players_online",0) > 0:
+                    if ping_minecraft_server(resolve_minecraft_srv(self.player.ip)).get("players_online",-1) > -1:
                         async with Build(0x72, self.player) as build: build.text({"text":f"Transfering","color":"green"}); build.bool(0)
                         async with Build(0x22, self.player) as build: build.byte(6, False); build.float(0)
 
