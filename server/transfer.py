@@ -42,7 +42,7 @@ class Transfer:
         # print(ip,port)
         async with Build(0x71, player) as build:
             build.string("mcords:cookie")
-            build.array(f"{ip}:{port}",build.byte)
+            build.array(f"{ip}:{port}".encode(),build.byte)
 
         async with Build(0x7a, player) as build:
             build.string("127.0.0.1")
