@@ -2,8 +2,8 @@ from server.config import config
 
 MOTD_DATA = {
     "version": {
-        "name": "1.21.5",  # Server brand helps compatibility
-        "protocol": 770  # Must exactly match client version
+        "name": "1.21.7",  # Server brand helps compatibility
+        "protocol": 772  # Must exactly match client version
     },
     "players": {
         "max": 1,  # Large number creates display space

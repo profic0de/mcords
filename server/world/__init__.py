@@ -46,7 +46,7 @@ class World:
                 self.player.pos.z = parse.double()
             elif packet_id == 0x1A:
                 self.keepAlive = time()
-            elif packet_id == 0x3e:
+            elif packet_id == 0x3f:
                 parse.varint()
                 if parse.position() == (8,1,13):
                     async with Build(0x34, self.player) as build:
@@ -59,13 +59,13 @@ class World:
                         build.short(0)
                         build.raw(b'\x01\xc6\x07\x01\x00\x05\x08\x00')
                         build.string("mc.hypixel.net")
-            elif packet_id == 0x2e:
+            elif packet_id == 0x2f:
                 self.player.ip = parse.string()
                 async with Build(0x13, self.player) as build:
                         build.varint(1)
                         build.short(0)
                         build.short(0)
-            elif packet_id == 0x10:
+            elif packet_id == 0x11:
                 parse.varint()
                 parse.varint()
                 check = parse.short() == 2
