@@ -57,14 +57,22 @@ class World:
                         build.varint(1)
                         build.varint(0)
                         build.short(0)
-                        build.raw(b'\x01\xc6\x07\x01\x00\x05\x08\x00')
+                        build.varint(1)
+                        # self.player.attempts = getattr(self.player, "attempts", 0) + 1
+                        build.varint(983)#+self.player.attempts
+                        build.raw(b'\x01\x00\x05\x08\x00')
                         build.string("mc.hypixel.net")
-            elif packet_id == 0x2f:
-                self.player.ip = parse.string()
-                async with Build(0x13, self.player) as build:
+                    async with Build(0x13, self.player) as build:
                         build.varint(1)
                         build.short(0)
                         build.short(0)
+
+            elif packet_id == 0x2f:
+                self.player.ip = parse.string()
+                async with Build(0x13, self.player) as build:
+                    build.varint(1)
+                    build.short(0)
+                    build.short(0)
             elif packet_id == 0x11:
                 parse.varint()
                 parse.varint()
@@ -73,7 +81,7 @@ class World:
                 parse.varint()
                 # def shs(): return (parse.short(), parse.hashed_slot())
                 # parse.array(shs)
-                if check and getattr(self.player, "ip", "mc.hypixel.net") != "mc.hypixel.net":
+                if check and getattr(self.player, "ip", "") != "":
                     async with Build(0x72, self.player) as build: build.text({"text":f"Atempting to connect to: {self.player.ip}","color":"green"}); build.bool(0)
                     async with Build(0x22, self.player) as build: build.byte(6, False); build.float(0)
 

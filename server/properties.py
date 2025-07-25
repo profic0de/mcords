@@ -2,7 +2,7 @@ from server.config import config
 
 MOTD_DATA = {
     "version": {
-        "name": "1.21.7",  # Server brand helps compatibility
+        "name": "1.21.8",  # Server brand helps compatibility
         "protocol": 772  # Must exactly match client version
     },
     "players": {

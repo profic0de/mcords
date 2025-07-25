@@ -41,6 +41,14 @@ async def handle_client(reader, writer):
             await Transfer.to(player, ip)
             await asyncio.sleep(1)
 
+        if next_state == 3:
+            player = Player(reader, writer)
+            world = World(player)
+            ip = await world.run()
+            logger.info(f'📡 Transfering {player.username} to {ip}')
+            await Transfer.to(player, ip)
+            await asyncio.sleep(1)
+
         if next_state - 1 not in range(3):
             logger.warn(f"⚠️  Unknown state received: {next_state}")
 
